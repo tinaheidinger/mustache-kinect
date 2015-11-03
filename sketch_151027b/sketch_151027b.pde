@@ -4,6 +4,7 @@ import java.util.Date;
 SimpleOpenNI context;
 PImage mustache;
 PImage razor;
+PImage mirrorImage;
 boolean displayMustache = true;
 boolean holdingRazor = true;
 
@@ -23,7 +24,7 @@ void setup() {
   
   mustache = loadImage("mustache.png");
   razor = loadImage("razor.png");
-  
+  mirrorImage = loadImage("spiegel.png");
   context.enableUser();
   context.setMirror(false);
   
@@ -86,6 +87,7 @@ void draw() {
     }
   }
   imageMode(CORNER);
+  image(mirrorImage, 0, 0);
 }
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
