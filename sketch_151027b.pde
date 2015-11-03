@@ -75,21 +75,18 @@ void draw() {
       if (razorX > mustacheX && razorX < (mustacheX + 120) && razorY > mustacheY && razorY < (mustacheY + 30)) {
         displayMustache = false;
         lastTimeShaved = millis();
-        println("Shaving");
-      } else {
-        println("Not shaving");
       }
     }
   }
 }
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
-  println("onNewUser called on user #" + userId);
+  println("new user #" + userId);
   context.startTrackingSkeleton(userId);
 }
 
 void onLostUser(SimpleOpenNI curContext, int userId) {
-  println("onLostUser called on user #" + userId);
+  println("lost user #" + userId);
   context.stopTrackingSkeleton(userId);
 }
 
