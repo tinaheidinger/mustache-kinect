@@ -26,6 +26,8 @@ void setup() {
   
   context.enableUser();
   context.setMirror(false);
+  
+  
 }
 
 void draw() {
@@ -35,25 +37,30 @@ void draw() {
   //image(context.userImage(),0,0);
   
   int[] userList = context.getUsers(); // store list of users in an int array
-  
+  imageMode(CENTER);
   for(int i = 0; i < userList.length; i++) {
-    println("Detected user #" + i);
+    //println("Detected user #" + i);
     if (context.isTrackingSkeleton(userList[i])) {
-      println("Skeleton detected");
+      //println("Skeleton detected");
       PVector head = new PVector();
       context.getJointPositionSkeleton(userList[i], SimpleOpenNI.SKEL_HEAD, head);
       
       PVector convertedHead = new PVector();
       context.convertRealWorldToProjective(head, convertedHead);
-      mustacheX = convertedHead.x-60;
-      mustacheY = convertedHead.y;
+      mustacheX = convertedHead.x;
+      mustacheY = convertedHead.y + 30;
+      println(convertedHead.z);
+      float mustacheScale = map(convertedHead.z, 600, 1000, 0.0, 0.5);
+      float mustacheWidth = 120 - mustacheScale * 120;
+      float mustacheHeight = 30 - mustacheScale  * 30;
+      
       
       if((lastTimeShaved + 5000) < millis()) {
         displayMustache = true;
       }
       
       if (displayMustache) {
-        image(mustache, mustacheX, mustacheY, 120, 30);
+        image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
       }
       
       PVector rightHand = new PVector();
@@ -66,28 +73,30 @@ void draw() {
         razorX = convertedRightHand.x-25;
         razorY = convertedRightHand.y-50;
         
-        image(razor, razorX, razorY, 50, 100);
+        //image(razor, razorX, razorY, 50, 100);
       } else {
-        image(razor, 10, 10, 50, 100);
+        //image(razor, 10, 10, 50, 100);
       }
       
       // detect collision between razor and mustache
       if (razorX > mustacheX && razorX < (mustacheX + 120) && razorY > mustacheY && razorY < (mustacheY + 30)) {
-        displayMustache = false;
+        //displayMustache = false;
         lastTimeShaved = millis();
       }
     }
   }
+  imageMode(CORNER);
 }
 
 void onNewUser(SimpleOpenNI curContext, int userId) {
-  println("new user #" + userId);
+ // println("new user #" + userId);
   context.startTrackingSkeleton(userId);
 }
 
 void onLostUser(SimpleOpenNI curContext, int userId) {
-  println("lost user #" + userId);
+  //println("lost user #" + userId);
   context.stopTrackingSkeleton(userId);
+  displayMustache = false;
 }
 
 float getAbsoluteValue(float originalValue) {
