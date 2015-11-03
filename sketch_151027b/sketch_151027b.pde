@@ -8,6 +8,8 @@ PImage mirrorImage;
 boolean displayMustache = true;
 boolean holdingRazor = true;
 
+PGraphics mustacheLayer;
+
 float mustacheX;
 float mustacheY;
 float razorX;
@@ -17,6 +19,10 @@ int lastTimeShaved = 0;
 
 void setup() {
   size(640,480); // size of application window
+  mustacheLayer = createGraphics(640, 480, JAVA3D);
+  mustacheLayer.beginDraw();
+  mustacheLayer.smooth();
+  mustacheLayer.endDraw();
   context = new SimpleOpenNI(this);
   context.enableDepth(); // receive data from depth sensor
   context.enableRGB(); // receive data from RGB sensor
@@ -27,7 +33,7 @@ void setup() {
   mirrorImage = loadImage("spiegel.png");
   context.enableUser();
   context.setMirror(false);
-  
+ 
   
 }
 
@@ -61,7 +67,8 @@ void draw() {
       }
       
       if (displayMustache) {
-        image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
+        mustacheLayer.image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
+        
       }
       
       PVector rightHand = new PVector();
@@ -75,6 +82,12 @@ void draw() {
         razorY = convertedRightHand.y-50;
         
         //image(razor, razorX, razorY, 50, 100);
+        
+        // do any erasing here
+        color c = color(0,0); // fully transparent
+        fill(c);
+        rectMode(CENTER);
+        mustacheLayer.rect(razorX, razorY, 50, 100);
       } else {
         //image(razor, 10, 10, 50, 100);
       }
