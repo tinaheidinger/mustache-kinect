@@ -19,7 +19,7 @@ int lastTimeShaved = 0;
 
 void setup() {
   size(640,480); // size of application window
-  mustacheLayer = createGraphics(640, 480, JAVA3D);
+  mustacheLayer = createGraphics(640, 480, JAVA2D);
   mustacheLayer.beginDraw();
   mustacheLayer.smooth();
   mustacheLayer.endDraw();
@@ -56,7 +56,7 @@ void draw() {
       context.convertRealWorldToProjective(head, convertedHead);
       mustacheX = convertedHead.x;
       mustacheY = convertedHead.y + 30;
-      println(convertedHead.z);
+      //println(convertedHead.z);
       float mustacheScale = map(convertedHead.z, 600, 1000, 0.0, 0.5);
       float mustacheWidth = 120 - mustacheScale * 120;
       float mustacheHeight = 30 - mustacheScale  * 30;
@@ -81,7 +81,7 @@ void draw() {
         razorX = convertedRightHand.x-25;
         razorY = convertedRightHand.y-50;
         
-        //image(razor, razorX, razorY, 50, 100);
+        image(razor, razorX, razorY, 50, 100);
         
         // do any erasing here
         color c = color(0,0); // fully transparent
@@ -100,6 +100,7 @@ void draw() {
     }
   }
   imageMode(CORNER);
+  image(mustacheLayer, 0, 0);
   image(mirrorImage, 0, 0);
 }
 
@@ -112,15 +113,6 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
   //println("lost user #" + userId);
   context.stopTrackingSkeleton(userId);
   displayMustache = false;
-}
-
-void onLostUser(SimpleOpenNI curContext, int userId) {
-  println("lost user #" + userId);
-  context.stopTrackingSkeleton(userId);
-}
-
-void onCreateHands(int handId, PVector pos, float time) {
-  println("Created hand #" + handId);
 }
 
 float getAbsoluteValue(float originalValue) {
