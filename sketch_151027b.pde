@@ -115,6 +115,14 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
   displayMustache = false;
 }
 
+void onCreateHands(int handId,PVector pos,float time) {
+  println("Created hand #" + handId);
+}
+
+void onDestroyHands(int handId,float time) {
+  println("Destroyed hand #" + handId);
+}
+
 float getAbsoluteValue(float originalValue) {
   if (originalValue < 0) {
     return originalValue * (-1);
