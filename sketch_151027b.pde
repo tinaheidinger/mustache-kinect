@@ -57,6 +57,7 @@ void draw() {
       mustacheX = convertedHead.x;
       mustacheY = convertedHead.y + 30;
       //println(convertedHead.z);
+      
       float mustacheScale = map(convertedHead.z, 600, 1000, 0.0, 0.5);
       float mustacheWidth = 120 - mustacheScale * 120;
       float mustacheHeight = 30 - mustacheScale  * 30;
@@ -113,14 +114,6 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
   //println("lost user #" + userId);
   context.stopTrackingSkeleton(userId);
   displayMustache = false;
-}
-
-void onCreateHands(int handId,PVector pos,float time) {
-  println("Created hand #" + handId);
-}
-
-void onDestroyHands(int handId,float time) {
-  println("Destroyed hand #" + handId);
 }
 
 float getAbsoluteValue(float originalValue) {
