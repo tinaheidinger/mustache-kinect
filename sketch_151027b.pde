@@ -15,20 +15,27 @@ float mustacheY;
 float razorX;
 float razorY;
 
+int maxMustacheWidth = 120;
+int maxMustacheHeight = 30;
 int lastTimeShaved = 0;
 
 void setup() {
   size(640,480); // size of application window
-  mustacheLayer = createGraphics(640, 480, JAVA2D);
+  mustacheLayer = createGraphics(maxMustacheWidth, maxMustacheHeight, JAVA2D);
   mustacheLayer.beginDraw();
   mustacheLayer.smooth();
+  
+  imageMode(CENTER);
+  mustache = loadImage("mustache.png");
+  mustacheLayer.image(mustache, 0, 0, maxMustacheWidth, maxMustacheHeight);
+        
   mustacheLayer.endDraw();
   context = new SimpleOpenNI(this);
   context.enableDepth(); // receive data from depth sensor
   context.enableRGB(); // receive data from RGB sensor
   context.alternativeViewPointDepthToImage(); // align depth sensor to RGB sensor
   
-  mustache = loadImage("mustache.png");
+  
   razor = loadImage("razor.png");
   mirrorImage = loadImage("spiegel.png");
   context.enableUser();
@@ -57,8 +64,8 @@ void draw() {
       mustacheX = convertedHead.x;
       mustacheY = convertedHead.y + 30;
       //println(convertedHead.z);
-      
-      float mustacheScale = map(convertedHead.z, 600, 1000, 0.0, 0.5);
+
+      float mustacheScale = map(convertedHead.z, 1000, 2000, 0.0, 0.5);
       float mustacheWidth = 120 - mustacheScale * 120;
       float mustacheHeight = 30 - mustacheScale  * 30;
       
@@ -68,8 +75,9 @@ void draw() {
       }
       
       if (displayMustache) {
-        mustacheLayer.image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
-        
+        //mustacheLayer.beginDraw();
+        //mustacheLayer.image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
+        //mustacheLayer.endDraw();
       }
       
       PVector rightHand = new PVector();
@@ -85,14 +93,42 @@ void draw() {
         image(razor, razorX, razorY, 50, 100);
         
         // do any erasing here
-        color c = color(0,0); // fully transparent
-        fill(c);
-        rectMode(CENTER);
-        mustacheLayer.rect(razorX, razorY, 50, 100);
+       
+        mustacheLayer.beginDraw();
+         color c = color(0,0); // fully transparent
+         mustacheLayer.loadPixels();
+         float mappedRazorX =  razorX- (mustacheX /*- mustacheWidth/2*/) ;
+         float mappedRazorY =  razorY- (mustacheY /*- mustacheHeight/2*/) ;
+         
+         if (mappedRazorX < 0) println("RASIERER -> BART");
+         if (mappedRazorX >= 0 && mappedRazorX < mustacheWidth) println("RASIERERBART");
+         if (mappedRazorX >= mustacheWidth) println("BART -> RASIERER");
+         
+         for (int x=0; x<mustacheLayer.width; x++) {
+           for (int y=0; y<mustacheLayer.height; y++) {
+             float distance = dist(x, y, mappedRazorX, mappedRazorY);
+             if (distance <= 25) {
+               int loc = x + y*mustacheLayer.width;
+               mustacheLayer.pixels[loc] = c;
+               
+             }
+           }
+         }
+         
+         mustacheLayer.updatePixels();
+         mustacheLayer.ellipseMode(CORNER);
+         mustacheLayer.stroke(0,0,255);
+         mustacheLayer.strokeWeight(2);
+         mustacheLayer.ellipse( mappedRazorX, mappedRazorY, 25, 25);
+        //fill(0,0,0,0);
+        //rectMode(CENTER);
+        //mustacheLayer.rect(razorX, razorY, 50, 100);
+        mustacheLayer.endDraw();
       } else {
         //image(razor, 10, 10, 50, 100);
       }
-      
+      image(mustacheLayer, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
+  
       // detect collision between razor and mustache
       if (razorX > mustacheX && razorX < (mustacheX + 120) && razorY > mustacheY && razorY < (mustacheY + 30)) {
         //displayMustache = false;
@@ -100,8 +136,8 @@ void draw() {
       }
     }
   }
+  
   imageMode(CORNER);
-  image(mustacheLayer, 0, 0);
   image(mirrorImage, 0, 0);
 }
 
