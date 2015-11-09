@@ -7,6 +7,7 @@ PImage razor;
 PImage mirrorImage;
 boolean displayMustache = true;
 boolean holdingRazor = true;
+boolean mustacheVisible = true;
 
 PGraphics mustacheLayer;
 
@@ -15,21 +16,69 @@ float mustacheY;
 float razorX;
 float razorY;
 
+boolean fadingIn = false;
+boolean fadingOut = false;
+
 int maxMustacheWidth = 120;
 int maxMustacheHeight = 30;
 int lastTimeShaved = 0;
 
+float mustacheTransparency = 1;
+float fadeLength = 60; // number of frames to complete one fading cycle
+int currentFadeFrame = 0;
+float fadeRate = 0.1;
+
+void startFadeInMustache() {
+  fadingIn = true;
+  fadingOut = false;
+  
+  mustacheTransparency = 0;
+  fadeRate = 1 / fadeLength;
+  currentFadeFrame = 0;
+}
+void startFadeOutMustache() {
+  println("FADEOUT");
+  
+  fadingIn = false;
+  fadingOut = true;
+  mustacheTransparency = 1;
+  fadeRate = 1 / fadeLength;
+    //println(fadeRate);
+  currentFadeFrame = 0;
+}
+void doFadeInMustache() {
+  // call every time the frame needs to decrease opacity
+  if (currentFadeFrame <= fadeLength) {
+    mustacheTransparency += fadeRate;
+    currentFadeFrame++;
+  }
+  else {
+    mustacheVisible = true;
+    fadingIn = false;
+  }
+}
+void doFadeOutMustache() {
+  if (currentFadeFrame <= fadeLength) {
+    mustacheTransparency -= fadeRate;
+    println(mustacheTransparency);
+    currentFadeFrame++;
+  }
+  else  {
+    mustacheVisible = false;
+    fadingOut = false;
+  }
+}
 void setup() {
   size(640,480); // size of application window
-  mustacheLayer = createGraphics(maxMustacheWidth, maxMustacheHeight, JAVA2D);
-  mustacheLayer.beginDraw();
-  mustacheLayer.smooth();
+  //mustacheLayer = createGraphics(maxMustacheWidth, maxMustacheHeight, JAVA2D);
+ // mustacheLayer.beginDraw();
+ // mustacheLayer.smooth();
   
-  imageMode(CENTER);
+  //imageMode(CENTER);
   mustache = loadImage("mustache.png");
-  mustacheLayer.image(mustache, 0, 0, maxMustacheWidth, maxMustacheHeight);
+  //mustacheLayer.image(mustache, 0, 0, maxMustacheWidth, maxMustacheHeight);
         
-  mustacheLayer.endDraw();
+  //mustacheLayer.endDraw();
   context = new SimpleOpenNI(this);
   context.enableDepth(); // receive data from depth sensor
   context.enableRGB(); // receive data from RGB sensor
@@ -69,9 +118,10 @@ void draw() {
       float mustacheHeight = 30 - mustacheScale  * 30;
       
       
-      if((lastTimeShaved + 5000) < millis()) {
-        displayMustache = true;
-      }
+      /*if((lastTimeShaved + 5000) < millis()) {
+        //displayMustache = true;
+        startFadeInMustache();
+      }*/
       
       if (displayMustache) {
         //mustacheLayer.beginDraw();
@@ -90,49 +140,27 @@ void draw() {
         razorY = convertedRightHand.y-50;
         
         image(razor, razorX, razorY, 50, 100);
-        
-        // do any erasing here
+
        
-        mustacheLayer.beginDraw();
-         color c = color(0,0); // fully transparent
-         mustacheLayer.loadPixels();
-         float mappedRazorX =  razorX- (mustacheX /*- mustacheWidth/2*/) ;
-         float mappedRazorY =  razorY- (mustacheY /*- mustacheHeight/2*/) ;
-         
-         if (mappedRazorX < 0) println("RASIERER -> BART");
-         if (mappedRazorX >= 0 && mappedRazorX < mustacheWidth) println("RASIERERBART");
-         if (mappedRazorX >= mustacheWidth) println("BART -> RASIERER");
-         
-         for (int x=0; x<mustacheLayer.width; x++) {
-           for (int y=0; y<mustacheLayer.height; y++) {
-             float distance = dist(x, y, mappedRazorX, mappedRazorY);
-             if (distance <= 25) {
-               int loc = x + y*mustacheLayer.width;
-               mustacheLayer.pixels[loc] = c;
-               
-             }
-           }
-         }
-         
-         mustacheLayer.updatePixels();
-         mustacheLayer.ellipseMode(CORNER);
-         mustacheLayer.stroke(0,0,255);
-         mustacheLayer.strokeWeight(2);
-         mustacheLayer.ellipse( mappedRazorX, mappedRazorY, 25, 25);
-        //fill(0,0,0,0);
-        //rectMode(CENTER);
-        //mustacheLayer.rect(razorX, razorY, 50, 100);
-        mustacheLayer.endDraw();
       } else {
         //image(razor, 10, 10, 50, 100);
       }
-      image(mustacheLayer, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
-  
+      tint(255, 255*mustacheTransparency);
+      //println(mustacheX + " "  + mustacheY);
+      
+      
+      if (mustacheVisible || fadingIn || fadingOut) image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
+      tint(255, 255);
       // detect collision between razor and mustache
-      if (razorX > mustacheX && razorX < (mustacheX + 120) && razorY > mustacheY && razorY < (mustacheY + 30)) {
+      if (razorX > (mustacheX - (mustacheWidth/2)) && razorX < (mustacheX + (mustacheWidth/2)) && razorY > (mustacheY + (mustacheHeight/2)) && razorY < ( (mustacheY + mustacheY / 2) + 30)) {
         //displayMustache = false;
+        if ((!fadingOut)) startFadeOutMustache();
+        
         lastTimeShaved = millis();
       }
+      /*if (fadingOut)*/ doFadeOutMustache();
+      /*else if (fadingIn)*/ doFadeInMustache();
+      //println(mustacheTransparency);
     }
   }
   
