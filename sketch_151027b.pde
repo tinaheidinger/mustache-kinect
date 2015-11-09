@@ -37,7 +37,7 @@ void startFadeInMustache() {
   currentFadeFrame = 0;
 }
 void startFadeOutMustache() {
-  println("FADEOUT");
+  //println("START FADEOUT");
   
   fadingIn = false;
   fadingOut = true;
@@ -49,7 +49,7 @@ void startFadeOutMustache() {
 void doFadeInMustache() {
   // call every time the frame needs to decrease opacity
   if (currentFadeFrame <= fadeLength) {
-    mustacheTransparency += fadeRate;
+    mustacheTransparency = min((mustacheTransparency + fadeRate), 1);
     currentFadeFrame++;
   }
   else {
@@ -59,13 +59,14 @@ void doFadeInMustache() {
 }
 void doFadeOutMustache() {
   if (currentFadeFrame <= fadeLength) {
-    mustacheTransparency -= fadeRate;
-    println(mustacheTransparency);
+    mustacheTransparency = max((mustacheTransparency - fadeRate), 0);
+    //println(mustacheTransparency);
     currentFadeFrame++;
   }
   else  {
     mustacheVisible = false;
     fadingOut = false;
+    //println("END FADEOUT");
   }
 }
 void setup() {
@@ -113,16 +114,18 @@ void draw() {
       mustacheX = convertedHead.x;
       mustacheY = convertedHead.y + 30;
       //println(convertedHead.z);
-
       float mustacheScale = map(convertedHead.z, 1000, 2000, 0.0, 0.5);
       float mustacheWidth = 120 - mustacheScale * 120;
       float mustacheHeight = 30 - mustacheScale  * 30;
       
       
-      /*if((lastTimeShaved + 5000) < millis()) {
-        //displayMustache = true;
-        startFadeInMustache();
-      }*/
+      if((lastTimeShaved + 5000) < millis()) {
+        //mustacheVisible = true;
+       // startFadeInMustache();
+       mustacheVisible = true;
+       fadingIn = false;
+       fadingOut = false;
+      }
       
       if (displayMustache) {
         //mustacheLayer.beginDraw();
@@ -146,21 +149,29 @@ void draw() {
       } else {
         //image(razor, 10, 10, 50, 100);
       }
-      tint(255, 255*mustacheTransparency);
+      if (mustacheVisible && !(fadingIn||fadingOut)) tint(255, 255);
+      else tint(255, 255*mustacheTransparency);
       //println(mustacheX + " "  + mustacheY);
       
       
+      println("MustacheVisible: " + mustacheVisible);
+      println("FadingIN: " +fadingIn);
+      println("FadingOUT: " + fadingOut);
       if (mustacheVisible || fadingIn || fadingOut) image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
       tint(255, 255);
       // detect collision between razor and mustache
       if (razorX > (mustacheX - (mustacheWidth/2)) && razorX < (mustacheX + (mustacheWidth/2)) && razorY > (mustacheY + (mustacheHeight/2)) && razorY < ( (mustacheY + mustacheY / 2) + 30)) {
         //displayMustache = false;
-        if ((!fadingOut)) startFadeOutMustache();
+       //println("COLLIDE");
+        if ((!fadingOut) && mustacheVisible) {
+          
+          startFadeOutMustache();
+          lastTimeShaved = millis();
+        }
         
-        lastTimeShaved = millis();
       }
-      /*if (fadingOut)*/ doFadeOutMustache();
-      /*else if (fadingIn)*/ doFadeInMustache();
+      if (fadingOut) doFadeOutMustache();
+      else if (fadingIn) doFadeInMustache();
       //println(mustacheTransparency);
     }
   }
@@ -178,6 +189,14 @@ void onLostUser(SimpleOpenNI curContext, int userId) {
   //println("lost user #" + userId);
   context.stopTrackingSkeleton(userId);
   displayMustache = false;
+}
+
+void onCreateHands(int handId,PVector pos,float time) {
+  println("Created hand #" + handId);
+}
+
+void onDestroyHands(int handId,float time) {
+  println("Destroyed hand #" + handId);
 }
 
 float getAbsoluteValue(float originalValue) {
