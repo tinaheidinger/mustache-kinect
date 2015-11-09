@@ -1,5 +1,4 @@
 import SimpleOpenNI.*;
-import java.util.Date;
 
 SimpleOpenNI context;
 
