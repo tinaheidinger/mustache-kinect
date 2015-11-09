@@ -6,7 +6,7 @@ We used Processing 2 with SimpleOpenNI on OS X.
 
 ## Project Description
 
-We developed a game where mustaches are drawn onto each player’s face and scale depending on the player’s distance from the sensor. Each player is equipped with a razor that can be used to shave the mustache. The environment reminds of a bathroom mirror.
+We developed a game where mustaches are drawn onto each player’s face and scale depending on the player’s distance from the sensor. Each player is equipped with a razor that can be used to shave the mustache. The environment reminds of a bathroom mirror. The player can grab the razor from its storage and put it back afterwards.
 
 ## Sources
 
@@ -17,4 +17,11 @@ We developed a game where mustaches are drawn onto each player’s face and scal
 
 ## Custom-built parts
 
-asdf
+* Mirror frame
+* Drawing the mustache onto each player's face
+* Drawing the razor onto each player's right hand
+* Collision detection between razor and mustache
+* Fading out the mustache on collision with razor
+* Collision detection between razor and razor storage
+* Taking the razor from the storage and putting it back
+* Redisplaying the mustache every 5 seconds
