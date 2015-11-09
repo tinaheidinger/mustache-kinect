@@ -6,15 +6,23 @@ PImage mustache;
 PImage razor;
 PImage mirrorImage;
 boolean displayMustache = true;
-boolean holdingRazor = true;
+boolean holdingRazor = false;
 boolean mustacheVisible = true;
-
+float razorWidth = 50;
+float razorHeight = 100;
 PGraphics mustacheLayer;
 
 float mustacheX;
 float mustacheY;
 float razorX;
 float razorY;
+/*float flaconX;
+float flaconY;*/
+
+float razorStorageX = 520;
+float razorStorageY = 170;
+float razorStorageWidth = 50;
+float razorStorageHeight = 100;
 
 boolean fadingIn = false;
 boolean fadingOut = false;
@@ -93,7 +101,9 @@ void setup() {
  
   
 }
-
+boolean isCoordinateInStorage(float handX, float handY) {
+  return (handX > razorStorageX && handX < razorStorageX + razorStorageWidth && handY > razorStorageY && handY < razorStorageY + razorStorageHeight);
+}
 void draw() {
   background(0); // clears window with black color to reduce artefacts
   context.update(); // asks kinect to send new data
@@ -119,13 +129,13 @@ void draw() {
       float mustacheHeight = 30 - mustacheScale  * 30;
       
       
-      if((lastTimeShaved + 5000) < millis()) {
+      /*if((lastTimeShaved + 5000) < millis()) {
         //mustacheVisible = true;
        // startFadeInMustache();
        mustacheVisible = true;
        fadingIn = false;
        fadingOut = false;
-      }
+      }*/
       
       if (displayMustache) {
         //mustacheLayer.beginDraw();
@@ -143,12 +153,43 @@ void draw() {
         razorX = convertedRightHand.x-25;
         razorY = convertedRightHand.y-50;
         
-        image(razor, razorX, razorY, 50, 100);
+        if (isCoordinateInStorage(razorX, razorY)) {
+          // put back the razor
+          holdingRazor = false; 
+          razorX = razorStorageX;
+          razorY = razorStorageY;
+        }
+        
+        
 
-       
+         if (razorX > (mustacheX - (mustacheWidth/2)) && razorX < (mustacheX + (mustacheWidth/2)) && razorY > (mustacheY + (mustacheHeight/2)) && razorY < ( (mustacheY + mustacheY / 2) + 30)) {
+          //displayMustache = false;
+         //println("COLLIDE");
+          if ((!fadingOut) && mustacheVisible) {
+            
+            startFadeOutMustache();
+            lastTimeShaved = millis();
+          }
+          
+        }
       } else {
         //image(razor, 10, 10, 50, 100);
+        float handX = convertedRightHand.x;
+        float handY = convertedRightHand.y;
+        if (isCoordinateInStorage(handX, handY) ) {
+          //displayMustache = false;
+         //println("COLLIDE");
+            if (!holdingRazor) {
+              holdingRazor = true;
+            }
+            else {
+              holdingRazor = false;
+            }
+        }
+        
       }
+      image(razor, razorX, razorY, razorWidth, razorHeight);
+      
       if (mustacheVisible && !(fadingIn||fadingOut)) tint(255, 255);
       else tint(255, 255*mustacheTransparency);
       //println(mustacheX + " "  + mustacheY);
@@ -160,16 +201,7 @@ void draw() {
       if (mustacheVisible || fadingIn || fadingOut) image(mustache, mustacheX, mustacheY, mustacheWidth, mustacheHeight);
       tint(255, 255);
       // detect collision between razor and mustache
-      if (razorX > (mustacheX - (mustacheWidth/2)) && razorX < (mustacheX + (mustacheWidth/2)) && razorY > (mustacheY + (mustacheHeight/2)) && razorY < ( (mustacheY + mustacheY / 2) + 30)) {
-        //displayMustache = false;
-       //println("COLLIDE");
-        if ((!fadingOut) && mustacheVisible) {
-          
-          startFadeOutMustache();
-          lastTimeShaved = millis();
-        }
-        
-      }
+      
       if (fadingOut) doFadeOutMustache();
       else if (fadingIn) doFadeInMustache();
       //println(mustacheTransparency);
